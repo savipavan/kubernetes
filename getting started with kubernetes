@@ -1,0 +1,51 @@
+# kubernetes
+------------
+1.1 Getting Started with Kubernetes:
+-------------------
+Beginner - Getting Started with Docker
+Intermediate - Docker Deep Dive
+Advanced - Integrating Docker with DevOps Automated Workflows
+
+2.1 Course introduction:
+----------
+
+-> Docker and Containers : The Big Picture
+-> Getting Started with Docker
+
+Agenda:
+1. What is Kubernetes
+2. Kubernetes architecture
+3. Installing Kubernetes
+4. Working with Pods
+5. Workign with Deployments
+6. What next
+
+3.1 What is Kubernetes:
+- Born in Google
+- Donated to CNCF in 2014(Open Source)
+- Writtent in Go/Golang
+https://github.com/kuberntes/kubernetes
+- IRC, @kubernetesio, slack.k8s.io
+- DNA from Borg and Omega
+- Often shortened to k8s
+
+Borg (Proprietary) -> Omega (Proprietary) -> Kubernetes(Open-Source)
+
+3.2 Why and What is Kubernetes:
+------------
+Containers bring scalbility challenges!
+
+We're starting to view the data center as a computer!
+
+4.1 Kubernetes Architecture:
+- Big Picture view
+- Masters
+- Nodes
+- Pods
+- Services
+- Deployments
+- Recap
+
+4.2 Big Pictrue View:
+- An orchestrator for Microservice apps
+- 
