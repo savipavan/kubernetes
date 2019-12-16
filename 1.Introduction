@@ -1,0 +1,23 @@
+Welcome to this class kubernetes is container orchestration technology
+it is the way of deploy and manage docker containers
+one of the hotest topics in today and it is only stright forward way for hybring and cloud
+- Kubernetes is supported by big 3 vendors
+- PODs are basic building blockers in kubernetes each pod will hold one or more containers
+- Deployments : higher level abstraction that provide versioning, fast rollback, rolling updates and more
+- Services: Front-end abstraction similar to Load Balancers
+Others:
+ - Secrets
+ - Stateful sets
+ - Config maps
+ - jobs
+ - Cron jobs
+
+1. Why Kubernetes So Hot Right now?
+- Cloud computing becoming very impactorent
+- Cloud Computing:
+	- Pay-as-you-go
+	- Autoscaling
+	- Low-ops/no-ops
+- Containerised workloads:
+	- Docker
+- Kubernetes runs container clusters cloud
