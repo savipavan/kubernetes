@@ -1,42 +1,145 @@
-Welcome to this class kubernetes is container orchestration technology
-it is the way of deploy and manage docker containers
-one of the hotest topics in today and it is only stright forward way for hybring and cloud
-- Kubernetes is supported by big 3 vendors
-- PODs are basic building blockers in kubernetes each pod will hold one or more containers
-- Deployments : higher level abstraction that provide versioning, fast rollback, rolling updates and more
-- Services: Front-end abstraction similar to Load Balancers
-Others:
- - Secrets
- - Stateful sets
- - Config maps
- - jobs
- - Cron jobs
+CKA
+----
+-> What are containers?
+compare to bare metal and virtual machines
+bare metal: HW infr with OS
+app will directly interact with HW
+App is not portable
 
-1. Why Kubernetes So Hot Right now?
-- Cloud computing becoming very impactorent
-- Cloud Computing:
-	- Pay-as-you-go
-	- Autoscaling
-	- Low-ops/no-ops
-- Containerised workloads:
-	- Docker
-- Kubernetes runs container clusters cloud
+virtual machines: underlying hw --> host OS and above hypervisor:
+Level of abstration 
+VMs runs on top of hypervisor. each VM contains guest OS
+VM are heavyweight images:
+- GB in size
+- Contains guest OS
+- slow to boot - autoscaling/autohealing slows down
+- not that portable - migrations are painful
+
+Container: A container image is a lightweight, stand-alone, executable package of a piece of software that includes everything needed to run it: code, runtime, system tools, system libraries, settings
+
+- Containers are 'Like' Jars
+
+Containers have many advantages:
+- No guest OS
+- Platform independent
+- Light weight images:
+- MB in size
+- no os
+- fast to fire up - good for autoscaling
+
+--> What is Docker?
+Docker is a tool that can package an application and its dependecies in a virtual container that can run on any linux server
+- containerisation technology
+- lightweight images
+- Linux - resource isolation and other features(C groups, kernel)
+- Independt containers within linux withough VM overhead
+
+- docker started in dotCloud, a PaaS company in france
+- open-sources in 2013
+- most popular container engine today
+
+2 components
+- Docker compose: Create Docker containers using .yaml manifests to define containers
+- Docker Swarm: Cluster orchestrator - losing out to kubernetes now
+
+Docker and Kubernetes - it's compllicated:
+- Dockers and Kubernetes are complements
+- Docker swarm and kubernetes are competitors
+
+- Now: Native Docker support for Kubernetes
+- Docker to spin off container format containerd
+
+--> What kubernetes:
+Auto-healing: Crashed containers should restart
+Auto-scaling: more clients? more demand
+Load-balancing: Distribute client requests
+isolation: Sanboxes so that containers don't interfere
+
+Kubernetes: Orchestration technology for containers - convert isolated containers running on different hardware into a cluster
+
+Kubernetes for Hybrid, multi-cloud world
+
+Hybrid: On-premise datacenter + public cloud
+Multi-cloud: more than one public cloud provider
+Why Hybrid? Cloud migration is slow, legacy DCs already exist
+Why multi-cloud? Strategic reasons(Amazon/Whole Foods)
 
 Cloud Computing:
-- AWS, Azure, GCP offers Compute and Storage
+- AWS, Azure, GCP
 
-IAAS:
-- Virtual machines
-Limiations:
-- Too much Ops
-- Migration is painful
+Chapter 2 : Skipped
 
+Chapter 3: Kubernetes and the Ecosystem
+--> How does kubernetes works?
+orchestration technology - convert isolated containers running on different hardware into a cluster
 
-PAAS: Allows cloud users to deploy apss withough VM
-Limiations:
-- Lock-in to cloud provider
+Isolated Infra:
+- Containers running on Baremetal, VM instances or cloud instances
 
-Containers are middle path between IAAS and PAAS and Kubernetes is required to manage containers
+Pods on kubernetes nodes: 
+- Atomic unit of deployment in kubernetes
+- Consists of 1 or more tightly coupled containers
+- Pod runs on node, which is controlled by master
 
-2. What are containers?
-Bare Metal: HW infrastructure with OS
+Kubernetes for orchestration:
+Fault-tolerance: Pod/Nod failures
+Auto-scaling: More clients? More demand
+Rollback: Advanced deployment options
+Auto-healing: Crashed containers restart
+Load-balancing: Distribute client requests
+Isolation: Sanboxes so that containers don't interfere
+
+working with kubernetes : kubectl
+
+--> What does the kubernetes master do?
+- One or moer nodes designated as master
+- several kubernetes processes run on master
+- all services called as control pane
+- multi-master for high-availability
+
+kube-apiserver: 
+- interact directly with user
+- RESTful API end-points
+- Manifest yaml files are accepted by apiserver
+
+cluster store for meta
+
+apiserver ment to scale hroizontal
+front end for cluster
+
+etcd: 
+- cluster store for metadata
+- metadata about spec and status of cluster
+- etcd is consistent and highly available key-value store
+- source-of-trust for cluster state
+
+Pods:
+- atomic unit of deployment in kubernetes
+
+Kube-scheduler: 
+- Handle pod creation and management
+- kube-schduler match/assign nodes to pods
+- complex - affinities, taints, tolerations,...
+
+Controller-manager:
+- different master processes
+- autual state --> desired state
+- cloud-controller-manager for cloud clusters
+- kube-controller-manager for on-premise
+
+controller-manager:
+- node controller
+- replication controller
+- route controller
+- Volume controller
+
+Kubernetes manster(Control pane)
+- kube-apiserver
+- etcd
+- kube-schduler
+- kube-controller-manager
+
+--> What Runs On Each Node Of A Cluster?
+- kubelet: Agent running on this node
+- listens to kub
+- kube-proxy
