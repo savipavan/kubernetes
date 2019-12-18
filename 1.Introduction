@@ -21,3 +21,22 @@ Others:
 - Containerised workloads:
 	- Docker
 - Kubernetes runs container clusters cloud
+
+Cloud Computing:
+- AWS, Azure, GCP offers Compute and Storage
+
+IAAS:
+- Virtual machines
+Limiations:
+- Too much Ops
+- Migration is painful
+
+
+PAAS: Allows cloud users to deploy apss withough VM
+Limiations:
+- Lock-in to cloud provider
+
+Containers are middle path between IAAS and PAAS and Kubernetes is required to manage containers
+
+2. What are containers?
+Bare Metal: HW infrastructure with OS
