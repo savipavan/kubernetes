@@ -1,0 +1,624 @@
+1. Core Concepts(19%)
+---------------------
+Notes from LA:
+-------------
+1. Lecture: Kubernetes Cluster Architecture
+------------
+- one or many more master courses
+- one or zero nodes
+- within a node, pods will host application
+
+- kubernetes relocate app components to another node without notice
+
+master node components:
+- API Server: commujication hub for all cluster components it exposes the kubernetes API
+- Schduler: Assign you app to a worker node.Auto-detects which pod to assign to which node based on resource requirements
+- Controller Manager: Maintains the clusters
+- ETCD : data store for cluster configuration: recommendation to take back-up
+
+worker node components;
+- provide services
+- kubelet: runs and managers the containers on the node and talks t the api server
+- kube-proxy: load balances traffic between application components
+- container runtime: the program that runs your containers(docer, rkt, containerd)
+
+> kubectl get nodes
+> kubectl get pods
+> kubectl get pods -o wide
+
+namespace: virtual cluster
+> kubectl get namespaces
+
+# Create nginx pod
+$ vim nginx.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+	
+> kubectl get pods
+> kubectl describe pods nginx
+
+> kubectl delete pod nginx
+
+2. API Primitives:
+------------------
+- Inter cluster communication happens by calling API Server. Each component communicates with API server. API server communicates only with ETCD
+- kubectl command uses to create, delete, update the objects
+- API exposes API resources all components of control pane
+
+> kubectl get componentstatus
+
+#Show labesl
+> kubectl get pods --show-labels
+
+#Create labels
+> kubectl label pod nginx env=prod
+
+#view label env
+> kubectl get pods -L env
+
+#Add Annotations
+> kubectl annotate deployment nginx-deploymentmycompany.com/someannotation="chad'
+
+#use file selectors
+> kubectl get pods --field-selector status.phase=running
+
+3. Lecture: Kubernetes Services and Network Primitives
+------------------
+> kubectl get pods -o wide
+
+- service: a service allows you to dynamically access replicated pods
+- service will decide to route traffic from old pod to new pod
+
+> vim nginx-nodeport.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-nodeport
+spec:
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+	targetPort: 80
+	nodePort: 30080
+  selector:
+    app: nginx
+
+> kubectl create -f nginx-nodeport.yaml
+
+> kubectl get services
+
+> kubectl get service nginx-nodeport
+
+> curl localhost:30080
+
+> kubectl get pods
+
+> vim busybox-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: buysbox-pod
+spec:
+  containers:
+  - name: busybox-pod
+    image: busybox
+	args:
+	- sleep
+	- "1000"
+	
+> kubectl get pods -o wide
+
+> kubectl get svc
+
+> kubectl exec busybox -- curl <<clusterIp:80>>
+
+******************
+notes from Udemy:
+1. Core Concepts:
+- Kubernetes Architecture
+- ETCD For Beginners
+- ETCD in Kubernetes
+- Kube-API Server
+- Controller Managers
+- Kube Scheduler
+- Kubelet
+- Kube Proxy
+
+2. ETCD for beginers
+- What is ETCD?
+- What is a Key-Value Store?
+- How to get started quickly?
+- How to operate ETCD?
+
+Later:
+- What is a distributed system?
+- How ETCD Operates
+- RAFT Protocol
+- best practices on number of nodes
+
+- ETCD is a distributed reliable key-value store that is Simple, Secure & Fast
+- ETCD runs on 2379
+
+# Run ETCD Service
+> ./etcd
+> ./etcd set key1 value1
+> ./etcd get key1
+> .>etcdctl
+
+- ETCD saves the cluster objects information like
+Nodes
+PODS
+Configs
+Secrets
+Accounts
+Roles
+Bindings
+Others
+
+# Run commands to get information
+> kubectl exec etcd-master -n kube-system etcdctl get / --prefix -keys-only
+
+# view kube-api server 
+> kubectl get pods -n kube-system
+
+# View api-server options - kubeadm
+> cat /etc/kubernetes/manifests/kube-apiserver.yaml
+
+# check the running process
+> ps -aux | grep kube-apiserver
+
+kube controller manager:
+------------------------
+# view kube-controller-manager - kubeadm
+> kubectl get pods -n kube-system
+
+# view kube-controller-manager options
+> cat /etc/kubernetes/manifests/kube-controller-manager.yaml
+
+#view controller-manager-options
+> cat /etc/systemd/system/kube-controller-manager.service
+
+# check running process
+> ps -aux | grep kube-controller-manager
+
+kube-schduler:
+--------------
+# view kube-schduler options - kubeadm
+> cat /etc/kubernetes/manifests/kube-schduler.yaml
+
+# Check the running process
+> ps -aux | grep kube-scheduler
+
+Kubelet:
+--------
+** Kubeadm does not deploy Kubelets
+
+# View kubelet options
+> ps -aux | grep kubelet
+
+Kube-proxy:
+---
+- every pod can reach any other pod on the cluster
+
+> kubectl get pods -n kube-system
+
+- kubeproxy is deployed as daemonset
+> kubectl get daemonset -n kube-system
+
+# Practice Test - PODS
+----------------------
+1. How many PODs exist on the system?
+in the current(default) namespace
+$ $ kubectl get pods
+
+2. Create a new pod with the NGINX image
+$ kubectl run nginx --generator=run-pod/v1 --image=nginx
+
+3. How many pods are created now?
+Note: We have created a few more pods. So please check again.
+$ Run the command 'kubectl get pods' and count the number of pods.
+
+4. What is the image used to create the new pods?
+You must look at one of the new pods in detail to figure this out
+$ kubectl describe pod newpods-csmrx | grep Image
+
+5. Which nodes are these pods placed on?
+You must look at all the pods in detail to figure this out
+$ kubectl get pods -o wide
+
+6.How many containers are part of the pod 'webapp'?
+Note: We just created a new POD. Ignore the state of the POD for now.
+$ Run the command 'kubectl describe pod webapp' and look under the Containers section.
+
+7. What images are used in the new 'webapp' pod?
+You must look at all the pods in detail to figure this out
+$ kubectl describe pod webapp | grep Image
+
+8.What is the state of the container 'agentx' in the pod 'webapp'?
+Wait for it to finish the 'ContainerCreating' state
+$ Run the command 'kubectl describe pod webapp' and look under the containers section.
+
+9. What does the READY column in the output of the 'kubectl get pods' command indicate?
+$ Run the command 'kubectl get pods'.
+
+10. Delete the 'webapp' Pod.
+Once deleted, wait for the pod to fully terminate.
+$ $ kubectl delete pod webapp
+
+11. Create a new pod with the name 'redis' and with the image 'redis123'
+Use a pod-definition YAML file. And yes the image name is wrong!
+$ kubectl run redis --generator=run-pod/v1 --image=redis123 -o yaml > redis.yaml
+$ kubectl create -f redis.yaml
+
+12. Now fix the image on the pod to 'redis'.
+Update the pod-definition file and use 'kubectl apply' command or use 'kubectl edit pod redis' command.
+$ $ kubectl edit pod redis
+
+Replication Controllers & ReplicaSets:
+--------------------------------------
+- brain of the controllers
+- replication controller ensures that specicied number of pods run all the time
+- Load Balancing & Scaling
+
+# POD definition file
+$ vim pod-definition.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app=nginx
+	tier=front-end
+spec:
+  containers:
+  - image=nginx
+    name=nginx
+
+# ReplicationController definition file
+vim replication_controller.yaml
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+	tier: front-end
+spec:
+  metadata:
+    name: nginx
+    labels:
+      app=nginx
+	  tier=front-end
+    spec:
+      containers:
+      - image=nginx
+        name=nginx
+  replicas=3
+  
+> kubectl create -f rc-definition.ymal
+> kubectl get replicationcontrollers
+> kubectl get pods
+
+ReplicaSet:
+
+$ vim replicaset-definition.yaml
+vim replication_controller.yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+	tier: front-end
+spec:
+  metadata:
+    name: nginx
+    labels:
+      app=nginx
+	  tier=front-end
+    spec:
+      containers:
+      - image=nginx
+        name=nginx
+  replicas=3
+  selector:
+    matchLabels:
+	  type: front-end
+
+> kubectl create -f replicaset-definition.yaml
+
+# Labels and Selectors:
+-----------------------
+
+# how do we scale up replicaset-definition
+
+> update replicas number in replicaset yaml definition file
+
+> kubectl replace -f replicaset-definition.yaml
+(or)
+> kubectl scale --replicas=6 replicaset-definition.yaml
+(or)
+> kubectl scale --replicas=6 replicaset myapp-replicaset
+
+## Commands:
+> kubectl create -f replicaset-definition.yaml
+
+> kubectl get replicaset
+
+> kubectl delete replicaset myapp-replicaset
+
+> kubectl replace -f replicaset-definition.yaml
+
+> kubectl scale --replicas=6 replicas
+
+1. How many PODs exist on the system?
+in the current(default) namespace
+$ kubectl get pods
+
+2. How many ReplicaSets exist on the system?
+in the current(default) namespace
+$ kubectl get rs
+
+3. How about now? How many ReplicaSets do you see?
+We just made a few changes!
+$ kubectl get rs
+
+4. How many PODs are DESIRED in the new-replica-set?
+$ Run the command 'kubectl get replicaset' and look at the count under the 'Desired' column
+
+5. What is the image used to create the pods in the new-replica-set?
+$ kubectl describe pod new-replica-set-dp4hc | grep Image
+
+6.How many PODs are READY in the new-replica-set?
+$ Run the command 'kubectl get replicaset' and look at the count under the 'Ready' column
+
+7. Delete any one of the 4 PODs
+$ kubectl delete pods --all
+
+8. How many PODs exist now?
+$ $ kubectl get pods
+
+9.Why are there still 4 PODs, even after you deleted one?
+$ ReplicaSet ensures that desired number of PODs always run
+
+10. Create a ReplicaSet using the 'replicaset-definition-1.yaml' file located at /root/
+There is an issue with the file, so fix it.
+$ The value for 'apiVersion' is incorrect. Find the correct apiVersion for ReplicaSet.
+
+master $ kubectl create -f replicaset-definition-1.yaml
+error: unable to recognize "replicaset-definition-1.yaml": no matches for kind "ReplicaSet" in version "v1"
+
+11. Fix the issue in the replicaset-definition-2.yaml file and create a ReplicaSet using it.
+This file is located at /root/
+
+master $ kubectl create -f replicaset-definition-2.yaml
+The ReplicaSet "replicaset-2" is invalid: spec.template.metadata.labels: Invalid value: map[string]string{"tier":"nginx"}: `selector` does not match template `labels`
+
+12.Fix the original replica set 'new-replica-set' to use the correct 'busybox' image
+Either delete and re-create the ReplicaSet or Update the existing ReplicSet and then delete all PODs, so new ones with the correct image will be created.
+
+13.Scale the ReplicaSet to 5 PODs
+Use 'kubectl scale' command or edit the replicaset using 'kubectl edit replicaset'
+$ kubectl scale replicaset --replicas=5 new-replica-set
+
+14.Now scale the ReplicaSet down to 2 PODs
+Use 'kubectl scale' command or edit the replicaset using 'kubectl edit replicaset'
+$ kubectl edit rs new-replica-set
+
+
+Deployments:
+------------
+- provide more features for scaling out, rolling out updates to the pods
+
+Commands:
+> kubectl create -f deployment-definition.yaml
+
+> kubectl get deployments
+
+> kubectl get replicaset
+
+> kubectl get pods
+
+> kubectl get all
+
+1. How many PODs exist on the system?
+in the current(default) namespace
+$ kubectl get pods
+
+2.How many ReplicaSets exist on the system?
+in the current(default) namespace
+$ kubectl get rs
+
+3.How many Deployments exist on the system?
+in the current(default) namespace
+$ kubectl get deployments
+
+4. How many Deployments exist on the system now?
+We just created a Deployment! Check again!
+$ kubectl get deployments
+
+5. How many PODs exist on the system now?
+$ kubectl get pods
+
+6.Out of all the existing PODs, how many are ready?
+kubectl get deployments.apps and check for Ready
+
+7. What is the image used to create the pods in the new deployment?
+$ kubectl describe pod frontend-deployment-55c859888c-49qw2 | grep Image
+
+8. Create a new Deployment using the 'deployment-definition-1.yaml' file located at /root/
+There is an issue with the file, so try to fix it.
+
+Namespaces:
+-----------
+> kubectl get pods
+
+> kubectl get pods --all-namespaces
+
+# Create namespace
+
+#Create namespace definition file
+$ vim namespace-dev.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev
+  
+#Create services
+$ kubectl create -f namespace-dev.yaml
+
+> kubectl create namespace dev
+
+# Switching between namespaces
+$ kubectl config set-context $(kubectl config current-context) --namespace=dev
+
+> kubectl get pod
+
+> kubectl get pods --all-namespaces
+
+# Resource Quota to namespace:
+
+$ vim compute-quota.yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: dev
+spec:
+  hard:
+    pods: "10"
+	requests.cpu: "4"
+	requests.memory: 5Gi
+	limits.cpu: "10"
+	limits.memory: 10Gi
+
+> kubectl create -f compute-quota.yaml
+
+1. How many Namespaces exist on the system?
+
+
+Remember to use Google Chrome to open this quiz portal. It may hang going forward.
+$ kubectl get ns
+
+2. How many pods exist in the 'research' namespace?
+$ kubectl get pods -n research
+
+3. Create a POD in the 'finance' namespace.
+$ kubectl run redis -n finance --generator=run-pod/v1 --image=redis
+
+4. Which namespace has the 'blue' pod in it?
+$ kubectl get pods --all-namespaces -o wide | grep blue
+
+5. What DNS name should the Blue application use to access the database 'db-service' in its own namespace - 'marketing'.
+
+
+You can try it in the web application UI. Use port 3306.
+
+# Services:
+------------
+Service Types;
+1. NodePort
+2. ClusterIP
+3. LoadBalancer
+
+# Create NodePort Service
+$ vim service-definition.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  type: NodePort
+  ports:
+  - targetPort: 80
+    port: 80
+	nodePort: 30008
+  selector:
+    metadata:
+	  app: myapp
+	  type: front-end
+
+
+## CLuster Type:
+apiVersion: v1
+kind: Service
+metadata:
+  name: back-end
+spec:
+  type: ClusterIP
+  ports:
+  - targetPort: 80
+    port: 80
+  selector:
+    app: myapp
+	type: back-end
+	
+1. How many Services exist on the system?
+ANS: $ kubectl get svc
+
+2. What is the type of the default 'kubernetes' service?
+$ Run the command 'kubectl get service' and look at the Type column.
+
+3. What is the 'targetPort' configured on the 'kubernetes' service?
+$ kubectl describe svc kubernetes
+
+4. How many labels are configured on the 'kubernetes' service?
+$ Run the command 'kubectl describe service' and look at Labels.
+
+5. How many Endpoints are attached on the 'kubernetes' service
+$ Run the command 'kubectl describe service' and look at Endpoints.
+
+6.What is the image used to create the pods in the deployment?
+$ kodekloud/simple-webapp:red
+
+7.Create a new service to access the web application using the service-definition-1.yaml file
+Name: webapp-service; Type: NodePort; targetPort: 8080; port: 8080; nodePort: 30080; selector: simple-webapp
+
+master $ cat service-definition-1.yaml---
+apiVersion: v1kind: Service
+metadata:
+  name: webapp-servicespec:
+  type: NodePort  ports:
+    - targetPort: 8080
+      port: 8080      nodePort: 30080
+  selector:
+    name: simple-webapp
+	
+--------------
+Practice Test - Imperative Commands
+-------------
+1. Deploy a pod named nginx-pod using the nginx:alpine image.
+Use imperative commands only
+$ kubectl run nginx-pod --image=nginx:alpine --generator=run-pod/v1
+
+2.Deploy a redis pod using the redis:alpine image with the labels set to tier=db.
+
+
+Either use imperative commands to create the pod with the labels. Or else use imperative commands to generate the pod definition file, then add the labels before creating the pod using the file.
+$ kubectl run --generator=run-pod/v1 redis --image=redis:alpine -l tier=db
+
+3. Create a service redis-service to expose the redis application within the cluster on port 6379.
+
+
+Use imperative commands
+$ kubectl expose pod redis --port 6379 --selector tier=db --name redis-service
+
+4. Create a deployment named webapp using the image kodekloud/webapp-color with 3 replicas
+
+
+Try to use imperative commands only. Do not create definition files.
+$ kubectl run webapp --image=kodekloud/webapp-color --replicas=3
+
+5. Expose the webapp as service webapp-service application on port 30082 on the nodes on the cluster
+
+
+The web application listens on port 8080
+
+$ Run the command kubectl expose deployment webapp --type=NodePort --port=8080 --name=webapp-service --dry-run -o yaml > webapp-service.yaml to generate a service definition file. Then edit the nodeport in it and create a service.
